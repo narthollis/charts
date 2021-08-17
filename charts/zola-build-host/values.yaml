@@ -6,11 +6,11 @@ replicaCount: 1
 
 image:
   git:
-    repository: bitnami/git
+    repository: alpine/git
     pullPolicy: IfNotPresent
     tag: latest
   zola:
-    repository: balthek/zola
+    repository: narthollis/zola
     pullPolicy: IfNotPresent
     tag: ""
   nginx:

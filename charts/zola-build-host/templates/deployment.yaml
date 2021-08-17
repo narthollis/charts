@@ -38,7 +38,6 @@ spec:
           image: "{{ .Values.image.git.repository }}:{{ .Values.image.git.tag }}"
           imagePullPolicy: {{ .Values.image.git.pullPolicy }}
           args:
-            - git
             - clone
             - --depth=1
             - --recurse-submodules
