@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zola-build-host.fullname" . }}
+  labels:
+    {{- include "zola-build-host.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "zola-build-host.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "zola-build-host.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: scratch
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: {{ include "zola-build-host.fullname" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "zola-build-host.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: fetch
+          image: "{{ .Values.image.git.repository }}:{{ .Values.image.git.tag }}"
+          imagePullPolicy: {{ .Values.image.git.pullPolicy }}
+          args:
+            - git
+            - clone
+            - --depth=1
+            - --recurse-submodules
+            - --shallow-submodules
+            - --branch={{ .Values.repository.branch }}
+            - {{ .Values.repository.url }}
+            - /scratch
+          volumeMounts:
+            - mountPath: /scratch
+              name: scratch
+        - name: build
+          image: "{{ .Values.image.zola.repository }}:{{ .Values.image.zola.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.zola.pullPolicy }}
+          workingDir: /scratch
+          args:
+            - build
+          volumeMounts:
+            - mountPath: /scratch
+              name: scratch          
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.nginx.repository }}:{{ .Values.image.nginx.tag }}"
+          imagePullPolicy: {{ .Values.image.nginx.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d/
+              name: config
+              readOnly: true              
+            - mountPath: /scratch
+              name: scratch
+              readOnly: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
