@@ -3,6 +3,16 @@ entries:
   zola-build-host:
   - apiVersion: v2
     appVersion: 0.14.0
+    created: "2022-02-16T09:35:24.229643381Z"
+    description: A Helm chart for Kubernetes
+    digest: 4e2cc8b67efaef5e57f6b531313ca8f86f8dd003cbbe717070c5f091cb29864c
+    name: zola-build-host
+    type: application
+    urls:
+    - https://github.com/narthollis/charts/releases/download/zola-build-host-1.0.0/zola-build-host-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v2
+    appVersion: 0.14.0
     created: "2021-08-17T10:20:41.689623665Z"
     description: A Helm chart for Kubernetes
     digest: 4dbfbbe6bbd4a37853b0474507fbf720708bcfdcb0cb3ef1f2f7eeee3952eadc
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/narthollis/charts/releases/download/zola-build-host-0.1.0/zola-build-host-0.1.0.tgz
     version: 0.1.0
-generated: "2021-08-17T10:20:41.689630865Z"
+generated: "2022-02-16T09:35:24.229653782Z"
